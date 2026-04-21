@@ -11,7 +11,8 @@ import {
   Filler,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import { useTransactions, Corridor } from "@/hooks/useTransactions";
+import { Corridor } from "@/hooks/useTransactions";
+import { useTransactionsContext } from "@/context/TransactionsContext";
 import { compactNumber } from "@/lib/format";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
@@ -25,7 +26,7 @@ const CORRIDOR_COLORS: Record<Corridor, string> = {
 };
 
 export function CorridorKPIChart() {
-  const { transactions } = useTransactions();
+  const { transactions } = useTransactionsContext();
 
   const { labels, datasets } = useMemo(() => {
     // group by minute (HH:mm) and corridor
