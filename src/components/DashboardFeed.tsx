@@ -1,7 +1,9 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useTransactions, Transaction } from "@/hooks/useTransactions";
+import { Transaction } from "@/hooks/useTransactions";
+import { useTransactionsContext } from "@/context/TransactionsContext";
 import { relativeTime, formatAmount, compactNumber } from "@/lib/format";
+import { TransactionDetailModal } from "./TransactionDetailModal";
 
 const statusColor: Record<Transaction["status"], string> = {
   completed: "bg-emerald-400",
@@ -25,7 +27,8 @@ function StatChip({ label, value, accent }: { label: string; value: string | num
 }
 
 export function DashboardFeed() {
-  const { transactions, isConnected, stats } = useTransactions();
+  const { transactions, isConnected, stats } = useTransactionsContext();
+  const [selected, setSelected] = useState<Transaction | null>(null);
 
   const items = useMemo(() => transactions.slice(0, 30), [transactions]);
 
@@ -76,7 +79,8 @@ export function DashboardFeed() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, x: 20 }}
                 transition={{ duration: 0.25, ease: "easeOut" }}
-                className={`relative flex gap-3 rounded-lg border overflow-hidden ${
+                onClick={() => setSelected(tx)}
+                className={`relative flex gap-3 rounded-lg border overflow-hidden cursor-pointer hover:bg-zinc-800/40 transition-colors ${
                   anomaly
                     ? "bg-red-900/20 border-red-500/50 border-l-4 border-l-red-500"
                     : "bg-zinc-950/40 border-zinc-700/40"
@@ -115,6 +119,7 @@ export function DashboardFeed() {
           })}
         </AnimatePresence>
       </div>
+      <TransactionDetailModal tx={selected} onClose={() => setSelected(null)} />
     </div>
   );
 }
