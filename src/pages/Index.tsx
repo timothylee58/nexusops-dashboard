@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { FileText } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { DashboardFeed } from "@/components/DashboardFeed";
 import { CorridorKPIChart } from "@/components/CorridorKPIChart";
@@ -5,11 +7,14 @@ import { AlertsPanel } from "@/components/AlertsPanel";
 import { Protected } from "@/components/Protected";
 import { KPIStrip } from "@/components/KPIStrip";
 import { RoleActivityLog } from "@/components/RoleActivityLog";
+import { CorridorHealthWidget } from "@/components/CorridorHealthWidget";
+import { ReportModal } from "@/components/ReportModal";
 import { useAuth } from "@/context/AuthContext";
 
 const Index = () => {
-  const { user, role } = useAuth();
+  const { user, role, hasAccess } = useAuth();
   const firstName = user.name.split(" ")[0];
+  const [reportOpen, setReportOpen] = useState(false);
 
   return (
     <DashboardLayout>
@@ -30,6 +35,15 @@ const Index = () => {
             Corridor coverage
           </span>
           <span className="text-emerald-400 font-mono font-bold">5/5 active</span>
+          {hasAccess(["admin", "analyst"]) && (
+            <button
+              onClick={() => setReportOpen(true)}
+              className="ml-2 inline-flex items-center gap-1.5 bg-sky-500/10 border border-sky-500/30 text-sky-400 hover:bg-sky-500/20 transition rounded-lg px-4 py-2 text-sm"
+            >
+              <FileText className="w-4 h-4" />
+              Generate Report
+            </button>
+          )}
         </div>
       </div>
 
@@ -48,6 +62,9 @@ const Index = () => {
           </Protected>
         </div>
         <div className="md:col-span-2 lg:col-span-1 flex flex-col gap-4">
+          <Protected allowedRoles={["admin", "analyst"]}>
+            <CorridorHealthWidget />
+          </Protected>
           <AlertsPanel />
           {/* Audit summary admin only */}
           <Protected allowedRoles={["admin"]}>
@@ -87,6 +104,7 @@ const Index = () => {
       </div>
 
       <p className="sr-only">Current role: {role}</p>
+      <ReportModal open={reportOpen} onClose={() => setReportOpen(false)} />
     </DashboardLayout>
   );
 };

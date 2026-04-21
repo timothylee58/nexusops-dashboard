@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ShieldCheck, AlertTriangle } from "lucide-react";
-import { useTransactions } from "@/hooks/useTransactions";
+import { useTransactionsContext } from "@/context/TransactionsContext";
 import { relativeTime, formatAmount } from "@/lib/format";
 
 export function AlertsPanel() {
-  const { transactions } = useTransactions();
+  const { transactions } = useTransactionsContext();
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
 
   const anomalies = useMemo(
