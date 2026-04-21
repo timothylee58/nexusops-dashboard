@@ -104,6 +104,7 @@ const Index = () => {
       </div>
 
       <p className="sr-only">Current role: {role}</p>
+      <ReportModal open={reportOpen} onClose={() => setReportOpen(false)} />
     </DashboardLayout>
   );
 };
