@@ -1,8 +1,9 @@
 import { useAuth, Role } from "@/context/AuthContext";
 import { RoleSwitcher } from "./RoleSwitcher";
 import { AnimatePresence, motion } from "framer-motion";
-import { Activity, Bell, Settings, ChevronDown } from "lucide-react";
+import { Bell, Settings, ChevronDown, Moon, Sun } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useTheme } from "next-themes";
 
 const ROLE_BADGE_STYLES: Record<Role, string> = {
   admin: "bg-red-500/15 text-red-400 border-red-500/30",
@@ -14,6 +15,13 @@ export function NavBar() {
   const { user, role } = useAuth();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  function toggleTheme() {
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
+  }
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
@@ -24,7 +32,7 @@ export function NavBar() {
   }, []);
 
   return (
-    <header className="relative z-20 border-b border-zinc-800/80 bg-slate-950/80 backdrop-blur">
+    <header className="relative z-20 border-b border-border bg-background/85 backdrop-blur">
       <div className="max-w-[1600px] mx-auto px-6 py-3 flex items-center justify-between gap-4 flex-wrap">
         {/* Logo */}
         <div className="flex items-center gap-3">
@@ -56,16 +64,36 @@ export function NavBar() {
         </div>
 
         {/* Right user info */}
-        <div className="order-2 lg:order-3 flex items-center gap-2">
-          <button className="hidden sm:flex w-8 h-8 rounded-md hover:bg-zinc-800 items-center justify-center text-zinc-400 hover:text-zinc-100 transition relative">
-            <Bell className="w-4 h-4" />
-            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-amber-400" />
+        <div className="order-2 lg:order-3 flex items-center gap-2 flex-wrap justify-end">
+          {mounted && (
+            <button
+              type="button"
+              aria-label={`Switch theme (current ${theme ?? resolvedTheme ?? "system"})`}
+              onClick={toggleTheme}
+              className="w-9 h-9 rounded-md border border-border bg-card hover:bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground transition"
+            >
+              {resolvedTheme === "dark" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+            </button>
+          )}
+          <span className="hidden md:inline-block text-[10px] font-mono text-muted-foreground px-2 py-1 rounded-md border border-border bg-card/70">
+            ⌘ K
+          </span>
+          <button
+            type="button"
+            className="hidden sm:flex w-9 h-9 rounded-md hover:bg-accent border border-transparent items-center justify-center text-muted-foreground hover:text-foreground transition relative"
+            aria-label="Notifications"
+          >
+            <Bell className="w-4 h-4" aria-hidden />
+            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-amber-400" aria-hidden />
           </button>
-          <button className="hidden sm:flex w-8 h-8 rounded-md hover:bg-zinc-800 items-center justify-center text-zinc-400 hover:text-zinc-100 transition">
-            <Settings className="w-4 h-4" />
+          <button
+            type="button"
+            className="hidden sm:flex w-9 h-9 rounded-md hover:bg-accent border border-transparent items-center justify-center text-muted-foreground hover:text-foreground transition"
+            aria-label="Settings"
+          >
+            <Settings className="w-4 h-4" aria-hidden />
           </button>
-          <div className="hidden sm:block w-px h-6 bg-zinc-800" />
-
+          <div className="hidden sm:block w-px h-6 bg-border" />
           <div className="relative" ref={ref}>
             <button
               onClick={() => setOpen((v) => !v)}

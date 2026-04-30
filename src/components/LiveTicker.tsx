@@ -1,17 +1,18 @@
 import { useMemo } from "react";
 import { useTransactionsContext } from "@/context/TransactionsContext";
-import { Corridor, Transaction } from "@/hooks/useTransactions";
+import type { Corridor, Transaction } from "@/types/transaction";
 
 const CORRIDORS: Corridor[] = ["MY-SG", "SG-HK", "HK-JP", "MY-JP", "SG-JP"];
 const CURRENCY_SYMBOL: Record<string, string> = {
   MYR: "RM",
   SGD: "S$",
+  USD: "$",
   HKD: "HK$",
   JPY: "¥",
 };
 
 function statusGlyph(s: Transaction["status"]) {
-  if (s === "completed") return { ch: "✓", cls: "text-emerald-400" };
+  if (s === "settled") return { ch: "✓", cls: "text-emerald-400" };
   if (s === "failed") return { ch: "✗", cls: "text-red-400" };
   return { ch: "⚠", cls: "text-amber-400" };
 }

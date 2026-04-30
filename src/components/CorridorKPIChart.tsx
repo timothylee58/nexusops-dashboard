@@ -11,7 +11,7 @@ import {
   Filler,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import { Corridor } from "@/hooks/useTransactions";
+import type { Corridor } from "@/types/transaction";
 import { useTransactionsContext } from "@/context/TransactionsContext";
 import { compactNumber } from "@/lib/format";
 

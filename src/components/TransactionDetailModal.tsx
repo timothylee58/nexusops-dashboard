@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
-import { Transaction } from "@/hooks/useTransactions";
+import type { Transaction } from "@/types/transaction";
 import { useAuth } from "@/context/AuthContext";
 import { formatAmount } from "@/lib/format";
 
@@ -16,12 +16,13 @@ const CORRIDOR_DOT: Record<string, string> = {
 const CURRENCY_SYMBOL: Record<string, string> = {
   MYR: "RM",
   SGD: "S$",
+  USD: "$",
   HKD: "HK$",
   JPY: "¥",
 };
 
 const STATUS_BADGE: Record<string, string> = {
-  completed: "bg-emerald-400/10 text-emerald-400 border border-emerald-400/30",
+  settled: "bg-emerald-400/10 text-emerald-400 border border-emerald-400/30",
   failed: "bg-red-400/10 text-red-400 border border-red-400/30",
   pending: "bg-amber-400/10 text-amber-400 border border-amber-400/30",
 };
@@ -101,6 +102,7 @@ export function TransactionDetailModal({
             <div className="border-b border-zinc-800 my-4" />
 
             <div>
+              <Row label="Reference">{tx.referenceId}</Row>
               <Row label="Transaction ID">{tx.id}</Row>
               <Row label="Timestamp">{new Date(tx.timestamp).toLocaleString()}</Row>
               <Row label="Corridor">
@@ -109,6 +111,7 @@ export function TransactionDetailModal({
                   {tx.corridor_id}
                 </span>
               </Row>
+              <Row label="Category">{tx.category}</Row>
               <Row label="Currency">{tx.currency}</Row>
               <Row label="Amount">
                 {CURRENCY_SYMBOL[tx.currency]} {formatAmount(tx.amount)}

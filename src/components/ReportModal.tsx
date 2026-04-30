@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, FileText } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useTransactionsContext } from "@/context/TransactionsContext";
-import { Corridor } from "@/hooks/useTransactions";
+import type { Corridor } from "@/types/transaction";
 import { compactNumber, formatAmount } from "@/lib/format";
 
 const CORRIDORS: Corridor[] = ["MY-SG", "SG-HK", "HK-JP", "MY-JP", "SG-JP"];

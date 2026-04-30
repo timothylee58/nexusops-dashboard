@@ -6,7 +6,7 @@ import { LiveTicker } from "./LiveTicker";
 
 export function DashboardLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-slate-950 text-zinc-100 relative">
+    <div className="min-h-screen bg-background text-foreground relative">
       <div className="absolute inset-0 grid-bg pointer-events-none opacity-40" />
       <NavBar />
       <LiveTicker />

@@ -48,9 +48,9 @@ export function KPIStrip() {
       sparkColor: "#fbbf24",
     },
     {
-      key: "completed",
-      label: "Completed",
-      value: stats.completedCount,
+      key: "settled",
+      label: "Settled",
+      value: stats.settledCount,
       icon: CheckCircle2,
       color: "text-emerald-400",
       border: "border-emerald-500/30",
