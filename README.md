@@ -57,7 +57,7 @@ Open [http://localhost:8080](http://localhost:8080) — health check: [http://lo
 
 ## GitHub Actions → ECR → App Runner
 
-Workflow: [.github/workflows/deploy-aws.yml](.github/workflows/deploy-aws.yml).
+Workflow **Deploy to ECR**: [.github/workflows/deploy-aws.yml](.github/workflows/deploy-aws.yml).
 
 Configure **repository secrets**:
 
