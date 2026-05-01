@@ -1,6 +1,10 @@
 # OIDC → Amazon ECR login → build/push :sha and :latest → optional App Runner redeploy.
 name: Deploy to ECR
 
+# Opt JavaScript actions into Node.js 24 before the runner default flip (see GitHub changelog).
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   push:
     branches:
@@ -15,15 +19,25 @@ jobs:
       id-token: write # Required for OIDC authentication
       contents: read # Required to check out the repository
 
+    env:
+      # Region is not sensitive — prefer repo variable AWS_REGION; secret overrides if both set.
+      AWS_REGION_RESOLVED: ${{ secrets.AWS_REGION || vars.AWS_REGION }}
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+
+      - name: Verify AWS region is configured
+        if: ${{ env.AWS_REGION_RESOLVED == '' }}
+        run: |
+          echo "::error::AWS region is missing. Add repository variable **AWS_REGION** (recommended, e.g. us-east-1) or secret **AWS_REGION** under Settings → Secrets and variables → Actions."
+          exit 1
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION_RESOLVED }}
           role-session-name: GitHubActions
 
       - name: Login to Amazon ECR

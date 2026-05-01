@@ -183,16 +183,16 @@ permissions:
 
 Without **`id-token: write`**, role assumption fails.
 
-### Repository secrets (configuration, not long-lived AWS keys)
+### Repository secrets and variables (no long-lived AWS access keys)
 
-Configure these in **GitHub → Settings → Secrets and variables → Actions**:
+Configure these under **GitHub → Settings → Secrets and variables → Actions**.
 
-| Secret | Required | Purpose |
-|--------|----------|---------|
-| **`AWS_ROLE_TO_ASSUME`** | Yes (for this workflow) | **ARN** of the IAM role trusted by GitHub’s OIDC identity provider. |
-| **`AWS_REGION`** | Yes | Region where **ECR** (and **App Runner**, if used) live. |
-| **`ECR_REPOSITORY`** | Yes | **Repository name only** (not the full registry URL). |
-| **`APP_RUNNER_SERVICE_ARN`** | No | If set, triggers an App Runner deployment after push. |
+| Name | Type | Required | Purpose |
+|------|------|----------|---------|
+| **`AWS_ROLE_TO_ASSUME`** | Secret | Yes | **ARN** of the IAM role trusted by GitHub’s OIDC identity provider. |
+| **`AWS_REGION`** | **Variable** (recommended) or secret | Yes | Region where **ECR** (and **App Runner**, if used) live, e.g. `us-east-1`. The workflow resolves **`secrets.AWS_REGION`** first, then **`vars.AWS_REGION`**. Use a **variable** because the region is not sensitive. |
+| **`ECR_REPOSITORY`** | Secret | Yes | **Repository name only** (not the full registry URL). |
+| **`APP_RUNNER_SERVICE_ARN`** | Secret | No | If set, triggers an App Runner deployment after push. |
 
 With OIDC, you **do not** store **`AWS_ACCESS_KEY_ID`** / **`AWS_SECRET_ACCESS_KEY`** in GitHub for this workflow. GitHub exchanges the short-lived OIDC token with AWS STS for **temporary** credentials.
 
@@ -254,6 +254,7 @@ Review CloudTrail **`AssumeRoleWithWebIdentity`** entries using **`role-session-
 |-------|------------------|
 | OIDC **`AssumeRole`** denied | Trust policy **`sub`** / **`aud`** matches the repo and ref; OIDC provider ARN and issuer URL are correct. |
 | **`Could not assume role`** | **`AWS_ROLE_TO_ASSUME`** secret is the **full role ARN**; job has **`id-token: write`**. |
+| Missing **`aws-region`** | Set **`AWS_REGION`** as a repository **variable** (recommended) or secret; the workflow fails fast with an error if neither is set. |
 | ECR **`denied`** / **`403`** | Deploy role has **`GetAuthorizationToken`** plus repository-scoped push actions on the **correct** repo ARN and region. |
 | App Runner step fails | **`APP_RUNNER_SERVICE_ARN`** is correct; role includes **`apprunner:StartDeployment`** on that service. |
 | UI shows offline/mock data | Production image/build must set **`VITE_OFFLINE_FEED=false`** before **`vite build`** (Dockerfile does this). |
