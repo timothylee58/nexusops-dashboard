@@ -252,13 +252,41 @@ Review CloudTrail **`AssumeRoleWithWebIdentity`** entries using **`role-session-
 
 | Issue | Things to verify |
 |-------|------------------|
+| **`Credentials could not be loaded… Could not load credentials from any providers`** | Almost always **OIDC role assumption** failed, or **`AWS_ROLE_TO_ASSUME`** / **`ECR_REPOSITORY`** is missing. See [below](#credentials-could-not-be-loaded-from-any-providers). |
 | OIDC **`AssumeRole`** denied | Trust policy **`sub`** / **`aud`** matches the repo and ref; OIDC provider ARN and issuer URL are correct. |
-| **`Could not assume role`** | **`AWS_ROLE_TO_ASSUME`** secret is the **full role ARN**; job has **`id-token: write`**. |
+| **`Could not assume role`** | **`AWS_ROLE_TO_ASSUME`** secret is the **full role ARN**; workflow has **`permissions: id-token: write`**. |
 | Wrong AWS region | Set repository variable **`AWS_REGION`** (or secret) to match your **ECR** region; otherwise the workflow defaults to **`ap-southeast-1`**. |
 | ECR **`denied`** / **`403`** | Deploy role has **`GetAuthorizationToken`** plus repository-scoped push actions on the **correct** repo ARN and region. |
 | App Runner step fails | **`APP_RUNNER_SERVICE_ARN`** is correct; role includes **`apprunner:StartDeployment`** on that service. |
 | UI shows offline/mock data | Production image/build must set **`VITE_OFFLINE_FEED=false`** before **`vite build`** (Dockerfile does this). |
 | **`npm run build` OOM locally** | Increase Node heap (e.g. `NODE_OPTIONS=--max-old-space-size=8192`) or build inside Docker / CI where memory is higher. |
+
+### Credentials could not be loaded from any providers
+
+This comes from **`aws-actions/configure-aws-credentials`** when **no credentials** were obtained—usually **OIDC → STS AssumeRoleWithWebIdentity** never succeeded, or required inputs were empty.
+
+1. **Repository secrets**  
+   Under **Settings → Secrets and variables → Actions → Secrets**, confirm:
+   - **`AWS_ROLE_TO_ASSUME`** — full IAM role ARN, e.g. `arn:aws:iam::123456789012:role/GitHubActionsDeploy` (no quotes, no extra spaces or newlines).
+   - **`ECR_REPOSITORY`** — ECR **repository name only** (not the registry hostname).
+
+2. **OIDC permissions on the workflow**  
+   This repo sets **`permissions: id-token: write`** at the **workflow** level so GitHub can issue the OIDC token. If you fork or reuse the workflow, do not remove that permission.
+
+3. **IAM identity provider**  
+   In AWS IAM → **Identity providers**, you need **`https://token.actions.githubusercontent.com`** as an OIDC provider (see [AWS: Create an OIDC identity provider](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc.html) and [GitHub: Configuring OpenID Connect in Amazon Web Services](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services)).
+
+4. **Trust policy on the role**  
+   The role in **`AWS_ROLE_TO_ASSUME`** must trust **`sts.amazonaws.com`** with **`AssumeRoleWithWebIdentity`**, and conditions must allow **your** GitHub repo, for example:
+   - **`token.actions.githubusercontent.com:aud`** includes **`sts.amazonaws.com`** (often via **`StringEquals`**).
+   - **`token.actions.githubusercontent.com:sub`** matches how this workflow runs, e.g.  
+     `repo:YOUR_ORG/nexusops-dashboard:ref:refs/heads/main`  
+     (use your real **owner/repo**; widen only if you understand the risk).
+
+5. **Region**  
+   **`AWS_REGION`** (secret or variable) or the workflow default must match where **ECR** lives (this workflow defaults to **`ap-southeast-1`**).
+
+If **`AWS_ROLE_TO_ASSUME`** is unset, the workflow now fails early with a clearer error before the AWS credential step.
 
 ---
 
