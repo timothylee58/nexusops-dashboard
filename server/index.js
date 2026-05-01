@@ -1,10 +1,16 @@
 /**
  * Mock payment corridor API — in-memory store, SSE stream, idempotent POST /payments
+ * In production, serves Vite `dist/` from the same origin as `/api` (single Node process).
  */
 import express from "express";
 import cors from "cors";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const PORT = Number(process.env.MOCK_API_PORT || 3001);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const PORT = Number(process.env.PORT || process.env.MOCK_API_PORT || 3001);
 const corsOrigins =
   process.env.MOCK_API_CORS?.split(",").filter(Boolean) || [
     "http://localhost:8080",
@@ -379,6 +385,18 @@ app.post("/api/payments", (req, res) => {
   res.status(201).json(payload);
 });
 
+const distDir = path.join(__dirname, "..", "dist");
+if (fs.existsSync(distDir)) {
+  app.use(express.static(distDir));
+  app.get(/.*/, (req, res, next) => {
+    if (req.method !== "GET" || req.path.startsWith("/api")) {
+      next();
+      return;
+    }
+    res.sendFile(path.join(distDir, "index.html"), (err) => next(err));
+  });
+}
+
 app.listen(PORT, () => {
-  console.info(`mock-api listening on ${PORT}`);
+  console.info(`mock-api listening on ${PORT}${fs.existsSync(distDir) ? " (serving dist)" : ""}`);
 });
