@@ -190,7 +190,7 @@ Configure these under **GitHub → Settings → Secrets and variables → Action
 | Name | Type | Required | Purpose |
 |------|------|----------|---------|
 | **`AWS_ROLE_TO_ASSUME`** | Secret | Yes | **ARN** of the IAM role trusted by GitHub’s OIDC identity provider. |
-| **`AWS_REGION`** | **Variable** (recommended) or secret | Yes | Region where **ECR** (and **App Runner**, if used) live, e.g. `us-east-1`. The workflow resolves **`secrets.AWS_REGION`** first, then **`vars.AWS_REGION`**. Use a **variable** because the region is not sensitive. |
+| **`AWS_REGION`** | **Variable** (recommended) or secret | Optional | Region where **ECR** (and **App Runner**, if used) live. Resolved as **`secrets.AWS_REGION`** → **`vars.AWS_REGION`** → default **`ap-southeast-1`**. Set a variable if your resources are in another region. |
 | **`ECR_REPOSITORY`** | Secret | Yes | **Repository name only** (not the full registry URL). |
 | **`APP_RUNNER_SERVICE_ARN`** | Secret | No | If set, triggers an App Runner deployment after push. |
 
@@ -254,7 +254,7 @@ Review CloudTrail **`AssumeRoleWithWebIdentity`** entries using **`role-session-
 |-------|------------------|
 | OIDC **`AssumeRole`** denied | Trust policy **`sub`** / **`aud`** matches the repo and ref; OIDC provider ARN and issuer URL are correct. |
 | **`Could not assume role`** | **`AWS_ROLE_TO_ASSUME`** secret is the **full role ARN**; job has **`id-token: write`**. |
-| Missing **`aws-region`** | Set **`AWS_REGION`** as a repository **variable** (recommended) or secret; the workflow fails fast with an error if neither is set. |
+| Wrong AWS region | Set repository variable **`AWS_REGION`** (or secret) to match your **ECR** region; otherwise the workflow defaults to **`ap-southeast-1`**. |
 | ECR **`denied`** / **`403`** | Deploy role has **`GetAuthorizationToken`** plus repository-scoped push actions on the **correct** repo ARN and region. |
 | App Runner step fails | **`APP_RUNNER_SERVICE_ARN`** is correct; role includes **`apprunner:StartDeployment`** on that service. |
 | UI shows offline/mock data | Production image/build must set **`VITE_OFFLINE_FEED=false`** before **`vite build`** (Dockerfile does this). |
