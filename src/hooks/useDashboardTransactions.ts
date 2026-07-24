@@ -134,8 +134,10 @@ export function useDashboardTransactions(): UseDashboardTransactionsResult {
   const from = searchParams.get("from") || "";
   const to = searchParams.get("to") || "";
   const q = searchParams.get("q") || "";
-  const sortField = searchParams.get("sortField") === "amount" ? "amount" : "timestamp";
-  const sortDir = searchParams.get("sortDir") === "asc" ? "asc" : "desc";
+  const sortField: "amount" | "timestamp" =
+    searchParams.get("sortField") === "amount" ? "amount" : "timestamp";
+  const sortDir: "asc" | "desc" =
+    searchParams.get("sortDir") === "asc" ? "asc" : "desc";
 
   const params = useMemo(
     () => ({
@@ -284,7 +286,7 @@ export function useDashboardTransactions(): UseDashboardTransactionsResult {
           } else {
             n.set(key, value);
           }
-          if (key !== "page") n.set("page", "1");
+          n.set("page", "1");
           return n;
         },
         { replace: true }
