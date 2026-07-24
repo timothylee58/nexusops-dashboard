@@ -286,7 +286,7 @@ export function useDashboardTransactions(): UseDashboardTransactionsResult {
           } else {
             n.set(key, value);
           }
-          if (key !== "page") n.set("page", "1");
+          n.set("page", "1");
           return n;
         },
         { replace: true }
