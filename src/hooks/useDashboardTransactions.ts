@@ -134,8 +134,10 @@ export function useDashboardTransactions(): UseDashboardTransactionsResult {
   const from = searchParams.get("from") || "";
   const to = searchParams.get("to") || "";
   const q = searchParams.get("q") || "";
-  const sortField = searchParams.get("sortField") === "amount" ? "amount" : "timestamp";
-  const sortDir = searchParams.get("sortDir") === "asc" ? "asc" : "desc";
+  const sortField: "amount" | "timestamp" =
+    searchParams.get("sortField") === "amount" ? "amount" : "timestamp";
+  const sortDir: "asc" | "desc" =
+    searchParams.get("sortDir") === "asc" ? "asc" : "desc";
 
   const params = useMemo(
     () => ({
